@@ -7,6 +7,10 @@
 #include <arpa/inet.h>
 int p1, join;
 
+unsigned char send_message[256];
+unsigned char receive_message[256];
+
+
 void xor(char *msg,size_t msg_len, const char *key, size_t key_len){
     size_t key_index = 0;
     for(int i=0;i<msg_len;i++) {
@@ -15,15 +19,15 @@ void xor(char *msg,size_t msg_len, const char *key, size_t key_len){
     }
 }
 
-void *send_msg(void *message_s) { //type case every variable
-    unsigned char *msg = message_s;
-
+void *send_msg(void *arg) { //type case every variable
+    unsigned char *msg = send_message;
+    int send_sock = *(int *)arg;
    // unsigned char msg[256];
     unsigned char key[256];
 
 
     printf("Input message: \n");
-    fgets(msg,sizeof(msg),stdin);
+    fgets((char *)msg,256,stdin);
     printf("Input key: \n");
     fgets(key,sizeof(key),stdin);
 
@@ -35,28 +39,23 @@ void *send_msg(void *message_s) { //type case every variable
 
     unsigned char encrypted[256];
 
-
-    xor(msg,msg_len,key,key_len);
-    for (int i = 0; i < msg_len; i++) {
-        encrypted[i] = msg[i];
-    }
+    memcpy(encrypted,msg,msg_len);
+    xor(encrypted,msg_len,key,key_len);
 
 
-    size_t sent = send(p1,encrypted,msg_len,0);
+
+    size_t sent = send(send_sock,encrypted,msg_len,0);
     if (sent == -1) {
         printf("[x] Message failed to send \n");
     }
     return NULL;
 }
-void *receive_msg(void *message_r) {
-    unsigned char *encrypted_msg = message_r;
+void *receive_msg(void *receive_message) {
+    unsigned char *encrypted_msg = (unsigned char *)receive_message;
    //unsigned char encrypted_msg[256];
     char key[256];
 
-
     size_t encrypted_len = sizeof(encrypted_msg);
-
-
 
     size_t data_recieved;
     while ((data_recieved = recv(join,encrypted_msg,encrypted_len,0)) > 0 ) {
@@ -97,15 +96,13 @@ int main() {
         printf("[+] Connection failed \n");
     }
     printf("[+] Connection accepted \n");
-    unsigned char message_s[256];
-    unsigned char message_r[256];
     ///create and join thread
     pthread_t send, receive;
-    pthread_create(&send,NULL,send_msg,(void *)&message_s);//args passed in last ,
-    pthread_create(&receive,NULL,receive_msg,(void *) &message_r);//args passed in last ,
+    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
+    pthread_create(&receive,NULL,receive_msg,(void *) receive_message);//args passed in last ,
 
-    pthread_join(send_msg,NULL);
-    pthread_join(receive_msg,NULL);
+    pthread_join(send,NULL);
+    pthread_join(receive,NULL);
 }
 //watch video on threads again
 //confused on the concept of passing vars through threads cause i need user input in both threads maybe at the same time
