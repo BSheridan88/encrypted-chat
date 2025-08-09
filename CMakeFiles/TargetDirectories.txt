@@ -1,0 +1,3 @@
+/home/bode/CLionProjects/encrypted-chat/CMakeFiles/encrypted_chat.dir
+/home/bode/CLionProjects/encrypted-chat/CMakeFiles/edit_cache.dir
+/home/bode/CLionProjects/encrypted-chat/CMakeFiles/rebuild_cache.dir

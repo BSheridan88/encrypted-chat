@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/encrypted_chat.dir/link.d CMakeFiles/encrypted_chat.dir/p1.c.o CMakeFiles/encrypted_chat.dir/p2.c.o -o encrypted_chat
