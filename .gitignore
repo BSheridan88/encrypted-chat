@@ -1,0 +1,17 @@
+# Ignore CLion project files
+.idea/
+
+# Ignore build folders
+cmake-build-debug/
+cmake-build-release/
+build/
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore system files (optional)
+*.swp
+*~
