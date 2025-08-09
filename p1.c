@@ -97,7 +97,7 @@ int main() {
     printf("[+] Connection accepted \n");
     ///create and join thread
     pthread_t send, receive;
-    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
+    pthread_create(&send,NULL,send_msg,(void *)&p1);//args passed in last ,
     pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
 
     pthread_join(send,NULL);
