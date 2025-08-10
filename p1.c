@@ -41,7 +41,7 @@ void *send_msg(void *arg) {
     memcpy(encrypted,msg,msg_len);
     xor(encrypted,msg_len,key,key_len);
 
-
+    printf("Me:%s \n",(char *)msg);
 
     size_t sent = send(send_sock,encrypted,msg_len,0);
     if (sent == -1) {
@@ -97,7 +97,7 @@ int main() {
     printf("[+] Connection accepted \n");
     ///create and join thread
     pthread_t send, receive;
-    pthread_create(&send,NULL,send_msg,(void *)&p1);//args passed in last ,
+    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
     pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
 
     pthread_join(send,NULL);

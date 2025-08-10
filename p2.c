@@ -41,6 +41,8 @@ void *send_msg(void *arg) { //type cast all vars
     memcpy(encrypted,msg,msg_len);
     xor(encrypted,msg_len,key,key_len);
 
+    printf("Me:%s \n",(char *)msg);
+
     size_t sent = send(send_sock,encrypted,msg_len,0);
     if (sent == -1) {
         printf("[x] Message failed to send \n");
@@ -96,7 +98,7 @@ int main() {
     //
     //create and join thread
     pthread_t send, receive;
-    pthread_create(&send,NULL,send_msg,(void *)&p2);//args passed in last , //NULL for test cause fuck it
+    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last , //NULL for test cause fuck it
     pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,//NULL for test cause fuck it
 
     pthread_join(send,NULL);
