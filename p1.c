@@ -140,12 +140,15 @@ int main() {
                 // exit_flag = 1;
                 break;
             }
+        }else {
+            pthread_mutex_unlock(&input_lock);
         }
     }
 
     pthread_join(send,NULL);
     pthread_join(receive,NULL);
 }
+//on both sides it forces the fget on the ` or exit which fucks with tohers
 //watch video on threads again
 //confused on the concept of passing vars through threads cause i need user input in both threads maybe at the same time
 //Issue: might need to type your message while typing key to unlock message so thats gonna have to be addressed too
