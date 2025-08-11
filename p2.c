@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 
 int p2;
 
@@ -118,17 +119,22 @@ int main() {
     pthread_create(&receive,NULL,receive_msg,(void *)&p2);//args passed in last ,//NULL for test cause fuck it
 
 
+    int stdin_flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, stdin_flags | O_NONBLOCK);
+
     while (1) {
         char input[20];
         printf("Type ` to send a message or exit to EXIT \n");
-        fgets(input,20,stdin);
-        if (strcmp(input,"`") == 0) { //start of how to send a message
-            pthread_mutex_lock(&lock);
-            send_flag = 1;
-            pthread_mutex_unlock(&lock);
-        }else if (strcmp(input,"exit") == 0) {
-            exit_flag = 1;
-            break;
+        if (fgets(input,sizeof(input),stdin)!= NULL) {
+            input[strcspn(input, "\n")] = '\0';
+            if (strcmp(input,"`") == 0) {
+                pthread_mutex_lock(&lock);
+                send_flag = 1;
+                pthread_mutex_unlock(&lock);
+            }else if (strcmp(input,"exit") == 0) {
+                exit_flag = 1;
+                break;
+            }
         }
     }
         pthread_join(send,NULL);
