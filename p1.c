@@ -117,8 +117,6 @@ int main() {
     pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
     pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
 
-    int stdin_flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, stdin_flags | O_NONBLOCK);
 
     while (1) {
         char input[20];
