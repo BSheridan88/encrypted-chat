@@ -59,7 +59,7 @@ void *send_msg(void *arg) { //type cast all vars
         }
         pthread_mutex_unlock(&lock);
         usleep(100000);
-    }
+   }
     return NULL;
 }
 void *receive_msg(void *arg) {
@@ -69,11 +69,11 @@ void *receive_msg(void *arg) {
 
 
     size_t encrypted_len = sizeof(receive_message);
+    size_t data_recieved;
+    while (1){
+    //while (exit_flag != 1) {
+        data_recieved = recv(receive_sock,encrypted_msg,encrypted_len, 0);
 
-
-    while (exit_flag != 1) {
-        size_t data_recieved = recv(receive_sock,encrypted_msg,encrypted_len, 0);
-       //while ((data_recieved = recv(receive_sock,encrypted_msg,encrypted_len,0)) > 0 ) {
         if (data_recieved > 0){
             printf("Input key: \n");
             fgets(key,sizeof(key),stdin);
@@ -132,7 +132,7 @@ int main() {
                 send_flag = 1;
                 pthread_mutex_unlock(&lock);
             }else if (strcmp(input,"exit") == 0) {
-                exit_flag = 1;
+               // exit_flag = 1;
                 break;
             }
         }
