@@ -12,6 +12,7 @@ int p2;
 unsigned char send_message[256];
 unsigned char receive_message[256];
 pthread_mutex_t lock;
+pthread_mutex_t input_lock;
 int send_flag = 0;
 int exit_flag = 0;
 
@@ -33,16 +34,20 @@ void *send_msg(void *arg) { //type cast all vars
         pthread_mutex_lock(&lock);
         if (send_flag == 1) {
 
-
-
+            pthread_mutex_lock(&input_lock);
             printf("Input message: \n");
+
             fgets((char *)msg,256,stdin);
-
-            printf("Input key: \n");
-            fgets(key,sizeof(key),stdin);
-
-
+            pthread_mutex_unlock(&input_lock);
             msg[strcspn((char *)msg, "\n")] = '\0';
+
+
+            pthread_mutex_lock(&input_lock);
+            printf("Input key: \n");
+
+            fgets(key,sizeof(key),stdin);
+            pthread_mutex_unlock(&input_lock);
+
             key[strcspn((char *)key, "\n")] = '\0';
 
             size_t msg_len = strlen((char *)msg);
@@ -81,8 +86,11 @@ void *receive_msg(void *arg) {
             data_recieved = recv(receive_sock,encrypted_msg,encrypted_len, 0);
 
             if (data_recieved > 0) {
+                pthread_mutex_lock(&input_lock);
                 printf("Input key: \n");
+
                 fgets(key,sizeof(key),stdin);
+                pthread_mutex_unlock(&input_lock);
                 key[strcspn(key, "\n")] = '\0';
                 size_t key_len = strlen(key);
 
@@ -120,6 +128,7 @@ int main() {
     //create and join thread
     pthread_t send, receive;
     pthread_mutex_init(&lock,NULL);
+    pthread_mutex_init(&input_lock,NULL);
 
     pthread_create(&send,NULL,send_msg,(void *)&p2);//args passed in last , //NULL for test cause fuck it
     pthread_create(&receive,NULL,receive_msg,(void *)&p2);//args passed in last ,//NULL for test cause fuck it
@@ -129,7 +138,9 @@ int main() {
     printf("Type ` to send a message or exit to EXIT \n");
     while (1) {
         char input[20];
+        pthread_mutex_lock(&input_lock);
         if (fgets(input,sizeof(input),stdin)!= NULL) {
+            pthread_mutex_unlock(&input_lock);
             input[strcspn(input, "\n")] = '\0';
             if (strcmp(input,"`") == 0) {
                 pthread_mutex_lock(&lock);
@@ -140,6 +151,8 @@ int main() {
                 close(p2);
                 break;
             }
+        }else {
+            pthread_mutex_unlock(&input_lock);
         }
     }
         pthread_join(send,NULL);
