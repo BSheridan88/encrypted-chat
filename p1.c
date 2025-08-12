@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
 
 int p1, join;
 
@@ -15,8 +14,6 @@ pthread_mutex_t lock;
 pthread_mutex_t input_lock;
 int send_flag = 0;
 int exit_flag = 0;
-
-
 
 void xor(char *msg,size_t msg_len, const char *key, size_t key_len){
     size_t key_index = 0;
@@ -75,11 +72,12 @@ void *receive_msg(void *arg) {
     char key[256];
 
     size_t encrypted_len = sizeof(receive_message);
-
     size_t data_recieved;
+
     while (1) {
         data_recieved = recv(receive_sock,encrypted_msg,encrypted_len,0);
         if (data_recieved > 0) {
+
             pthread_mutex_lock(&input_lock);
             printf("Input key: \n");
             fgets(key,sizeof(key),stdin);
@@ -119,16 +117,15 @@ int main() {
     if (join < 0) {
         printf("[+] Connection failed \n");
     }
-    printf("[+] Connection accepted \n");
-    ///create and join thread
-    pthread_t send, receive;
 
+    printf("[+] Connection accepted \n");
+
+    pthread_t send, receive;
     pthread_mutex_init(&lock,NULL);
     pthread_mutex_init(&input_lock,NULL);
 
-    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
-    pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
-
+    pthread_create(&send,NULL,send_msg,(void *)&join);
+    pthread_create(&receive,NULL,receive_msg,(void *)&join);
 
     printf("Type ` to send a message or exit to EXIT \n");
     while (1) {
@@ -150,11 +147,9 @@ int main() {
             pthread_mutex_unlock(&input_lock);
         }
     }
-
     pthread_join(send,NULL);
     pthread_join(receive,NULL);
+    return 0;
 }
 //on both sides it forces the fget on the ` or exit which fucks with tohers
-//watch video on threads again
-//confused on the concept of passing vars through threads cause i need user input in both threads maybe at the same time
-//Issue: might need to type your message while typing key to unlock message so thats gonna have to be addressed too
+

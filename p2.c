@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
 
 int p2;
 
@@ -16,7 +15,6 @@ pthread_mutex_t input_lock;
 int send_flag = 0;
 int exit_flag = 0;
 
-
 void xor(char *msg,size_t msg_len, const char *key,size_t key_len) {
     size_t key_index = 0;
     for(int i=0;i<msg_len;i++) {
@@ -25,7 +23,7 @@ void xor(char *msg,size_t msg_len, const char *key,size_t key_len) {
     }
 }
 
-void *send_msg(void *arg) { //type cast all vars
+void *send_msg(void *arg) {
    unsigned char *msg = send_message;
     int send_sock = *(int *)arg;
     unsigned char key[256];
@@ -36,7 +34,6 @@ void *send_msg(void *arg) { //type cast all vars
 
             pthread_mutex_lock(&input_lock);
             printf("Input message: \n");
-
             fgets((char *)msg,256,stdin);
             pthread_mutex_unlock(&input_lock);
             msg[strcspn((char *)msg, "\n")] = '\0';
@@ -44,10 +41,8 @@ void *send_msg(void *arg) { //type cast all vars
 
             pthread_mutex_lock(&input_lock);
             printf("Input key: \n");
-
             fgets(key,sizeof(key),stdin);
             pthread_mutex_unlock(&input_lock);
-
             key[strcspn((char *)key, "\n")] = '\0';
 
             size_t msg_len = strlen((char *)msg);
@@ -63,7 +58,6 @@ void *send_msg(void *arg) { //type cast all vars
             size_t sent = send(send_sock,encrypted,msg_len,0);
             send_flag = 0;
 
-
             if (sent == -1) {
                 printf("[x] Message failed to send \n");
             }
@@ -78,20 +72,18 @@ void *receive_msg(void *arg) {
     int receive_sock = *(int *)arg;
     char key[256];
 
-
     size_t encrypted_len = sizeof(receive_message);
     size_t data_recieved;
     while (1){
-
             data_recieved = recv(receive_sock,encrypted_msg,encrypted_len, 0);
-
             if (data_recieved > 0) {
+
                 pthread_mutex_lock(&input_lock);
                 printf("Input key: \n");
-
                 fgets(key,sizeof(key),stdin);
                 pthread_mutex_unlock(&input_lock);
                 key[strcspn(key, "\n")] = '\0';
+
                 size_t key_len = strlen(key);
 
                 xor((char *)encrypted_msg,data_recieved,key,key_len);
@@ -103,12 +95,10 @@ void *receive_msg(void *arg) {
                 decrypted_msg[data_recieved] = '\0';
                 printf("Anonymous: %s\n", (char *)decrypted_msg);
             }
-
     }
     return NULL;
 }
 int main() {
-    //set up socket
     char *ip = " ";//ip
     int port = 4444;
     struct sockaddr_in client;
@@ -123,17 +113,12 @@ int main() {
     }
     printf("[+] Connected to chatroom \n");
 
-
-    //
-    //create and join thread
     pthread_t send, receive;
     pthread_mutex_init(&lock,NULL);
     pthread_mutex_init(&input_lock,NULL);
 
-    pthread_create(&send,NULL,send_msg,(void *)&p2);//args passed in last , //NULL for test cause fuck it
-    pthread_create(&receive,NULL,receive_msg,(void *)&p2);//args passed in last ,//NULL for test cause fuck it
-
-
+    pthread_create(&send,NULL,send_msg,(void *)&p2);
+    pthread_create(&receive,NULL,receive_msg,(void *)&p2);
 
     printf("Type ` to send a message or exit to EXIT \n");
     while (1) {
@@ -155,8 +140,7 @@ int main() {
             pthread_mutex_unlock(&input_lock);
         }
     }
-        pthread_join(send,NULL);
-        pthread_join(receive,NULL);
-
+    pthread_join(send,NULL);
+    pthread_join(receive,NULL);
     return 0;
 }
