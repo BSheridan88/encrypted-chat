@@ -122,16 +122,18 @@ int main() {
     printf("[+] Connection accepted \n");
     ///create and join thread
     pthread_t send, receive;
-    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
-    pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
 
     pthread_mutex_init(&lock,NULL);
     pthread_mutex_init(&input_lock,NULL);
 
+    pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
+    pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
+
+
     printf("Type ` to send a message or exit to EXIT \n");
     while (1) {
         char input[20];
-        pthread_mutex_unlock(&input_lock);
+        pthread_mutex_lock(&input_lock);
         if (fgets(input,sizeof(input),stdin)!= NULL) {
             pthread_mutex_unlock(&input_lock);
             input[strcspn(input, "\n")] = '\0';
