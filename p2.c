@@ -35,15 +35,14 @@ void *send_msg(void *arg) {
             pthread_mutex_lock(&input_lock);
             printf("Input message: \n");
             fgets((char *)msg,256,stdin);
-            pthread_mutex_unlock(&input_lock);
             msg[strcspn((char *)msg, "\n")] = '\0';
 
 
-            pthread_mutex_lock(&input_lock);
+
             printf("Input key: \n");
             fgets(key,sizeof(key),stdin);
-            pthread_mutex_unlock(&input_lock);
             key[strcspn((char *)key, "\n")] = '\0';
+            pthread_mutex_unlock(&input_lock);
 
             size_t msg_len = strlen((char *)msg);
             size_t key_len = strlen(key);
@@ -81,8 +80,8 @@ void *receive_msg(void *arg) {
                 pthread_mutex_lock(&input_lock);
                 printf("Input key: \n");
                 fgets(key,sizeof(key),stdin);
-                pthread_mutex_unlock(&input_lock);
                 key[strcspn(key, "\n")] = '\0';
+                pthread_mutex_unlock(&input_lock);
 
                 size_t key_len = strlen(key);
 
@@ -131,16 +130,23 @@ int main() {
                 pthread_mutex_lock(&lock);
                 send_flag = 1;
                 pthread_mutex_unlock(&lock);
+
+                while (send_flag == 1 && exit_flag != 1) {
+                    usleep(10000);
+                }
+
             }else if (strcmp(input,"exit") == 0) {
                 exit_flag = 1;
-                close(p2);
                 break;
             }
         }else {
             pthread_mutex_unlock(&input_lock);
         }
     }
+    close(p2);
     pthread_join(send,NULL);
     pthread_join(receive,NULL);
+    pthread_mutex_destroy(&lock);
+    pthread_mutex_destroy(&input_lock);
     return 0;
 }

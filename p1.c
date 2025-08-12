@@ -35,14 +35,14 @@ void *send_msg(void *arg) {
             pthread_mutex_lock(&input_lock);
             printf("Input message: \n");
             fgets((char *)msg,256,stdin);
-            pthread_mutex_unlock(&input_lock);
+
             msg[strcspn((char *)msg, "\n")] = '\0';
 
-            pthread_mutex_lock(&input_lock);
+
             printf("Input key: \n");
-            fgets(key,sizeof(key),stdin);
-            pthread_mutex_unlock(&input_lock);
+            fgets(key,sizeof(key),stdin);\
             key[strcspn((char *)key, "\n")] = '\0';
+            pthread_mutex_unlock(&input_lock);
 
             size_t msg_len = strlen((char *)msg);
             size_t key_len = strlen(key);
@@ -74,15 +74,15 @@ void *receive_msg(void *arg) {
     size_t encrypted_len = sizeof(receive_message);
     size_t data_recieved;
 
-    while (1) {
+    while (exit_flag != 1) {
         data_recieved = recv(receive_sock,encrypted_msg,encrypted_len,0);
         if (data_recieved > 0) {
 
             pthread_mutex_lock(&input_lock);
             printf("Input key: \n");
             fgets(key,sizeof(key),stdin);
-            pthread_mutex_unlock(&input_lock);
             key[strcspn(key, "\n")] = '\0';
+            pthread_mutex_unlock(&input_lock);
             size_t key_len = strlen(key);
 
             xor((char *)encrypted_msg,data_recieved,key,key_len);
@@ -138,8 +138,13 @@ int main() {
                 pthread_mutex_lock(&lock);
                 send_flag = 1;
                 pthread_mutex_unlock(&lock);
+
+                while (send_flag == 1 && exit_flag != 1) {
+                    usleep(10000);
+                }
+
             }else if (strcmp(input,"exit") == 0) {
-                close(p1);
+
                  exit_flag = 1;
                 break;
             }
@@ -147,8 +152,12 @@ int main() {
             pthread_mutex_unlock(&input_lock);
         }
     }
+    close(p1);
+    close(join);
     pthread_join(send,NULL);
     pthread_join(receive,NULL);
+    pthread_mutex_destroy(&lock);
+    pthread_mutex_destroy(&input_lock);
     return 0;
 }
 //on both sides it forces the fget on the ` or exit which fucks with tohers
