@@ -74,7 +74,7 @@ void *receive_msg(void *arg) {
     int receive_sock = *(int *)arg;
     char key[256];
 
-    size_t encrypted_len = sizeof(encrypted_msg);
+    size_t encrypted_len = sizeof(receive_message);
 
     size_t data_recieved;
     while (1) {
@@ -125,6 +125,9 @@ int main() {
     pthread_create(&send,NULL,send_msg,(void *)&join);//args passed in last ,
     pthread_create(&receive,NULL,receive_msg,(void *)&join);//args passed in last ,
 
+    pthread_mutex_init(&lock,NULL);
+    pthread_mutex_init(&input_lock,NULL);
+
     printf("Type ` to send a message or exit to EXIT \n");
     while (1) {
         char input[20];
@@ -137,7 +140,8 @@ int main() {
                 send_flag = 1;
                 pthread_mutex_unlock(&lock);
             }else if (strcmp(input,"exit") == 0) {
-                // exit_flag = 1;
+                close(p1);
+                 exit_flag = 1;
                 break;
             }
         }else {
