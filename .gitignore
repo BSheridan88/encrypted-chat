@@ -1,6 +1,7 @@
 # Ignore CLion IDE files
 .idea/
 
+
 # Ignore CMake build files and folders
 CMakeFiles/
 CMakeCache.txt
