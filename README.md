@@ -1,4 +1,3 @@
-# encrypted-chat
 # encrypted-chat (Learning Project)
 
 📚 About This Project  
