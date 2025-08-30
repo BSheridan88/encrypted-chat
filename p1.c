@@ -8,6 +8,7 @@
 
 int p1, join;
 
+
 unsigned char send_message[256];
 unsigned char receive_message[256];
 pthread_mutex_t lock;
